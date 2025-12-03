@@ -23,8 +23,10 @@ export type Database = {
           end_time: string | null
           featured_rank: number | null
           id: string
+          image_url: string | null
           is_featured: boolean | null
           is_published: boolean | null
+          links: Json[] | null
           name: string
           organizer_user_id: string
           start_time: string
@@ -44,8 +46,10 @@ export type Database = {
           end_time?: string | null
           featured_rank?: number | null
           id?: string
+          image_url?: string | null
           is_featured?: boolean | null
           is_published?: boolean | null
+          links?: Json[] | null
           name: string
           organizer_user_id: string
           start_time: string
@@ -65,8 +69,10 @@ export type Database = {
           end_time?: string | null
           featured_rank?: number | null
           id?: string
+          image_url?: string | null
           is_featured?: boolean | null
           is_published?: boolean | null
+          links?: Json[] | null
           name?: string
           organizer_user_id?: string
           start_time?: string
@@ -184,7 +190,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      delete_user_with_role_check: {
+        Args: { current_user_id: string; target_user_id: string }
+        Returns: {
+          deleted_user_id: string
+          message: string
+          success: boolean
+        }[]
+      }
+      update_user_with_role_check: {
+        Args: {
+          current_user_id: string
+          new_email: string
+          new_phone: string
+          new_role: string
+          target_user_id: string
+        }
+        Returns: {
+          message: string
+          success: boolean
+          updated_user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
@@ -250,7 +277,7 @@ export type TablesInsert<
         Insert: infer I
       }
       ? I
-      : never
+    : never
     : never
 
 export type TablesUpdate<
@@ -275,7 +302,7 @@ export type TablesUpdate<
         Update: infer U
       }
       ? U
-      : never
+    : never
     : never
 
 export type Enums<

@@ -100,7 +100,7 @@ export function canCreateEvents(userRole: UserRole): boolean {
 }
 
 export function canManageUsers(userRole: UserRole): boolean {
-  return userRole === 'owner';
+  return userRole === 'owner' || userRole === 'admin';
 }
 
 export function canViewSupportInbox(userRole: UserRole): boolean {

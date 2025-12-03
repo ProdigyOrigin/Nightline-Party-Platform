@@ -91,12 +91,10 @@ export default function Header() {
         case 'owner':
           return (
             <>
-              <Link href="/event-review" className="hover:text-primary-neon transition-colors">Event review</Link>
-              <Link href="/published-events" className="hover:text-primary-neon transition-colors">Published events</Link>
               <Link href="/support-inbox" className="hover:text-primary-neon transition-colors">Support inbox</Link>
-              {user.role === 'owner' && (
-                <Link href="/user-management" className="hover:text-primary-neon transition-colors">User management</Link>
-              )}
+              <Link href="/event-management" className="hover:text-primary-neon transition-colors">Event management</Link>
+              <Link href="/user-management" className="hover:text-primary-neon transition-colors">User management</Link>
+              {/* Removed duplicate "User management" link for owner */}
             </>
           );
         default:

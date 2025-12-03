@@ -1,0 +1,5 @@
+- Update all data access across the app to use the RLS-enabled Supabase client with authenticated user context for all read and write operations.
+- Ensure all queries, inserts, updates, and deletes are performed through policies that rely on the signed-in user’s identity; remove any usage patterns that bypass RLS or use service-role flows on the client.
+- Replace legacy endpoints or helper functions that interacted with non-RLS APIs with equivalents that respect table-level policies, including handling cases where data should be filtered to the current user or tenant.
+- Update error handling and user flows to surface appropriate messages when RLS denies access, including guiding users to sign in and handling unauthorized/forbidden states gracefully.
+- Validate that all app sections (lists, detail views, create/edit forms, admin views) function under RLS constraints, and adjust data scopes so users only see and modify data they are permitted to access.
