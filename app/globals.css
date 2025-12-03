@@ -2,11 +2,137 @@
 @tailwind components;
 @tailwind utilities;
 
-/* No global colors; components decide their own colors */
+/* Nightline Brand Colors */
+:root {
+  --color-bg-primary: #000000;
+  --color-bg-secondary: #111111;
+  --color-primary: #6A00FF;
+  --color-primary-neon: #9C4DFF;
+  --color-accent: #BB66FF;
+  --color-text-primary: #F4F4F4;
+  --color-text-secondary: #B0B0B0;
+  --color-badge-admin: #FFD447;
+  --color-badge-promoter: #4DCFFF;
+  --color-border: #333333;
+}
+
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  margin: 0;
+  padding: 0;
 }
 
 @layer utilities {
   .text-balance { text-wrap: balance; }
+  
+  /* Custom utility classes for brand colors */
+  .bg-primary { background-color: var(--color-primary); }
+  .bg-primary-neon { background-color: var(--color-primary-neon); }
+  .bg-accent { background-color: var(--color-accent); }
+  .bg-secondary { background-color: var(--color-bg-secondary); }
+  .text-primary { color: var(--color-primary); }
+  .text-primary-neon { color: var(--color-primary-neon); }
+  .text-accent { color: var(--color-accent); }
+  .text-secondary { color: var(--color-text-secondary); }
+  .border-neon { border-color: var(--color-primary-neon); }
+  
+  /* Neon glow effects */
+  .glow-neon {
+    box-shadow: 0 0 20px rgba(156, 77, 255, 0.5);
+  }
+  
+  .glow-neon-hover:hover {
+    box-shadow: 0 0 30px rgba(156, 77, 255, 0.7);
+  }
+  
+  /* Button styles */
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: var(--color-text-primary);
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--color-primary-neon);
+    box-shadow: 0 0 15px rgba(156, 77, 255, 0.5);
+  }
+  
+  .btn-primary:active {
+    background-color: var(--color-accent);
+  }
+  
+  /* Card styles */
+  .card-dark {
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.3s ease;
+  }
+  
+  .card-neon {
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-primary-neon);
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.3s ease;
+  }
+  
+  .card-neon:hover {
+    box-shadow: 0 0 20px rgba(156, 77, 255, 0.3);
+  }
+  
+  /* Badge styles */
+  .badge-admin {
+    background-color: var(--color-badge-admin);
+    color: var(--color-bg-primary);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .badge-promoter {
+    background-color: var(--color-badge-promoter);
+    color: var(--color-bg-primary);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .badge-owner {
+    background-color: transparent;
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-text-primary);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-neon);
 }

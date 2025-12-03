@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { type Database } from '@/database.types';
 
+// Create a normal SSR anon client tied to cookies (for typical RLS-aware queries)
 export async function createClient() {
   const cookieStore = await cookies()
 
@@ -20,10 +21,26 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            // Ignored in server components
           }
+        },
+      },
+    }
+  )
+}
+
+// Add a dedicated service-role client for privileged operations (no cookies, no user session merged)
+export function createServiceClient() {
+  return createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return []
+        },
+        setAll() {
+          // Do nothing: we do not attach any session to service client
         },
       },
     }
