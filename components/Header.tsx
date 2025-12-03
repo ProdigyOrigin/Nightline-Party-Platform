@@ -77,6 +77,7 @@ export default function Header() {
         case 'user':
           return (
             <>
+              <Link href="/promoter-application" className="hover:text-primary-neon transition-colors">Apply to Promote</Link>
               <Link href="/support" className="hover:text-primary-neon transition-colors">Support</Link>
             </>
           );

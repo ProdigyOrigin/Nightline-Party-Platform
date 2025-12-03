@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getBadgeType } from '@/lib/auth';
 
 interface Event {
   id: string;
@@ -28,6 +29,7 @@ interface Event {
   created_at: string;
   updated_at: string;
   organizer_username?: string;
+  organizer_role?: string;
 }
 
 export default function EventPage() {
@@ -43,7 +45,7 @@ export default function EventPage() {
           .from('events')
           .select(`
             *,
-            organizer:users!events_organizer_user_id_fkey (username)
+            organizer:users!events_organizer_user_id_fkey (username, role)
           `)
           .eq('id', params.id as string)
           .eq('is_published', true)
@@ -57,6 +59,7 @@ export default function EventPage() {
         const processedEvent = {
           ...data,
           organizer_username: data.organizer?.username,
+          organizer_role: data.organizer?.role,
           organizer: undefined
         };
 
@@ -102,6 +105,19 @@ export default function EventPage() {
     } else {
       navigator.clipboard.writeText(window.location.href);
       alert('Event link copied to clipboard!');
+    }
+  };
+
+  const getBadgeClass = (badgeType: string | null) => {
+    switch (badgeType) {
+      case 'owner':
+        return 'text-white bg-transparent'; // removed border
+      case 'admin':
+        return 'text-[var(--color-bg-primary)] bg-[var(--color-badge-admin)]';
+      case 'promoter':
+        return 'text-[var(--color-bg-primary)] bg-[var(--color-badge-promoter)]';
+      default:
+        return '';
     }
   };
 
@@ -191,10 +207,9 @@ export default function EventPage() {
                 </div>
               </div>
 
-              {/* Organizer Information */}
+              {/* Organizer Information - Updated */}
               {event.organizer_username && (
                 <div>
-                  <h2 className="text-2xl font-bold text-white mb-4">Organizer</h2>
                   <div className="bg-secondary rounded-lg p-6">
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
@@ -202,9 +217,22 @@ export default function EventPage() {
                           {event.organizer_username.charAt(0).toUpperCase()}
                         </span>
                       </div>
-                      <div>
+                      <div className="flex items-center space-x-2">
                         <div className="text-white font-medium">{event.organizer_username}</div>
-                        <div className="text-secondary">Event Organizer</div>
+                        {getBadgeType(event.organizer_role as any) && (
+                          <span
+                            className={`inline-flex items-center px-1 py-0.5 rounded ${getBadgeClass(getBadgeType(event.organizer_role as any))}`}
+                            aria-label="Verified user badge"
+                            title="Verified"
+                          >
+                            <img
+                              src="/verified.svg"
+                              alt="Verified"
+                              className="w-4 h-4"
+                            />
+                            <span className="sr-only">Verified</span>
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

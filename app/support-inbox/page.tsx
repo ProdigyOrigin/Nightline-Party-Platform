@@ -20,17 +20,33 @@ interface SupportMessage {
   handler_username?: string;
 }
 
+interface User {
+  id: string;
+  username: string;
+  role: string;
+  email: string | null;
+  phone: string | null;
+}
+
 export default function SupportInboxPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [messages, setMessages] = useState<SupportMessage[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(true);
+  const [loadingUsers, setLoadingUsers] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<SupportMessage | null>(null);
   const [filter, setFilter] = useState<'all' | 'open' | 'in_progress' | 'resolved'>('all');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [error, setError] = useState('');
+  const [showCreateTicket, setShowCreateTicket] = useState(false);
+  const [newTicket, setNewTicket] = useState({
+    target_user_id: '',
+    subject: '',
+    message: ''
+  });
 
   useEffect(() => {
     if (!loading) {
@@ -43,6 +59,7 @@ export default function SupportInboxPage() {
         return;
       }
       fetchMessages();
+      fetchUsers();
     }
   }, [user, loading, router]);
 
@@ -75,6 +92,24 @@ export default function SupportInboxPage() {
       setError('Failed to fetch support messages');
     } finally {
       setLoadingMessages(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, username, role, email, phone')
+        .order('username', { ascending: true });
+
+      if (error) throw error;
+      setUsers(data as User[]);
+    } catch (err) {
+      console.error('Error fetching users:', err);
+      setError('Failed to fetch users');
+    } finally {
+      setLoadingUsers(false);
     }
   };
 
@@ -139,6 +174,56 @@ export default function SupportInboxPage() {
     }
   };
 
+  const handleCreateTicket = async () => {
+    if (!newTicket.target_user_id || !newTicket.subject.trim() || !newTicket.message.trim()) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const supabase = createClient();
+      
+      // Get target user info
+      const targetUser = users.find(u => u.id === newTicket.target_user_id);
+      const ticketMessage = `
+Admin-created ticket for: ${targetUser?.username}
+User Role: ${targetUser?.role}
+User Email: ${targetUser?.email || 'Not provided'}
+User Phone: ${targetUser?.phone || 'Not provided'}
+
+Message: ${newTicket.message.trim()}
+
+---
+Created by: ${user.username} (${user.role})
+Created on: ${new Date().toLocaleDateString()}
+      `.trim();
+
+      const { error } = await supabase
+        .from('support_messages')
+        .insert({
+          sender_user_id: newTicket.target_user_id,
+          subject: newTicket.subject.trim(),
+          message_body: ticketMessage,
+          status: 'open',
+          handled_by_admin_id: user.id
+        });
+
+      if (error) throw error;
+
+      await fetchMessages();
+      setNewTicket({ target_user_id: '', subject: '', message: '' });
+      setShowCreateTicket(false);
+      setSuccessMessage('Ticket created successfully!');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to create ticket');
+      setTimeout(() => setError(''), 3000);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const filteredMessages = messages.filter(msg => {
     return filter === 'all' || msg.status === filter;
   });
@@ -193,6 +278,84 @@ export default function SupportInboxPage() {
           {error && (
             <div className="mb-6 p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-400">
               {error}
+            </div>
+          )}
+
+          {/* Create Ticket Button */}
+          <div className="mb-6">
+            <button
+              onClick={() => setShowCreateTicket(!showCreateTicket)}
+              className="btn-primary"
+            >
+              {showCreateTicket ? 'Cancel' : 'Create Ticket for User'}
+            </button>
+          </div>
+
+          {/* Create Ticket Form */}
+          {showCreateTicket && (
+            <div className="mb-8 p-6 bg-secondary border border-gray-700 rounded-lg">
+              <h3 className="text-lg font-semibold text-white mb-4">Create New Ticket</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-secondary">
+                    Target User *
+                  </label>
+                  <select
+                    value={newTicket.target_user_id}
+                    onChange={(e) => setNewTicket(prev => ({ ...prev, target_user_id: e.target.value }))}
+                    className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-lg focus:outline-none focus:border-primary-neon text-white"
+                  >
+                    <option value="">Select a user</option>
+                    {users.map(u => (
+                      <option key={u.id} value={u.id}>
+                        {u.username} ({u.role})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-secondary">
+                    Subject *
+                  </label>
+                  <input
+                    type="text"
+                    value={newTicket.subject}
+                    onChange={(e) => setNewTicket(prev => ({ ...prev, subject: e.target.value }))}
+                    className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-lg focus:outline-none focus:border-primary-neon text-white"
+                    placeholder="Ticket subject"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-secondary">
+                    Message *
+                  </label>
+                  <textarea
+                    value={newTicket.message}
+                    onChange={(e) => setNewTicket(prev => ({ ...prev, message: e.target.value }))}
+                    rows={4}
+                    className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-lg focus:outline-none focus:border-primary-neon text-white resize-none"
+                    placeholder="Message to the user"
+                  />
+                </div>
+                <div className="flex space-x-4">
+                  <button
+                    onClick={handleCreateTicket}
+                    disabled={submitting}
+                    className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? 'Creating...' : 'Create Ticket'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowCreateTicket(false);
+                      setNewTicket({ target_user_id: '', subject: '', message: '' });
+                    }}
+                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
