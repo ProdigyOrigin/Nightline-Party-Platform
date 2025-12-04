@@ -113,9 +113,9 @@ export default function EventPage() {
       case 'owner':
         return 'text-white bg-transparent'; // removed border
       case 'admin':
-        return 'text-[var(--color-bg-primary)] bg-[var(--color-badge-admin)]';
+        return 'text-[var(--color-bg-primary)]';
       case 'promoter':
-        return 'text-[var(--color-bg-primary)] bg-[var(--color-badge-promoter)]';
+        return 'text-[var(--color-bg-primary)]';
       default:
         return '';
     }
